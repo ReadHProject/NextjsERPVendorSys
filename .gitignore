@@ -1,0 +1,18 @@
+node_modules
+.next
+out
+dist
+.env
+.env.local
+.DS_Store
+*.log
+coverage
+prisma/migrations
+public/uploads/*
+!public/uploads/.gitkeep
+tempimages
+
+# Ignore loose workspace app folders
+/admin
+/backend
+/storefront
