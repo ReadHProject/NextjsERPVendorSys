@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
+import { getAdminUrl, isAdminUser, getDashboardUrl } from "@/lib/utils";
 
 export function HeaderActions() {
   const router = useRouter();
@@ -42,18 +43,20 @@ export function HeaderActions() {
     router.push("/store");
   }
 
+  const isAdmin = isAdminUser(user);
+
   return (
     <div className="flex items-center gap-1">
       <ThemeToggle />
       {!loading && user ? (
         <div className="flex items-center gap-2">
-          <Link
-            href="/account/dashboard"
+          <a
+            href={getDashboardUrl(user)}
             className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium text-sm"
           >
             <Icon name="layout-dashboard" size={16} />
-            Dashboard
-          </Link>
+            {isAdmin ? "Admin Dashboard" : "Dashboard"}
+          </a>
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -65,15 +68,26 @@ export function HeaderActions() {
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg z-50 py-1">
-                  <Link
-                    href="/account/dashboard"
-                    className="flex sm:hidden items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors font-semibold text-primary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <Icon name="layout-dashboard" size={16} />
-                    Dashboard
-                  </Link>
+                <div className="absolute right-0 top-full mt-1 w-52 bg-popover border border-border rounded-lg shadow-lg z-50 py-1">
+                  {isAdmin ? (
+                    <a
+                      href={getAdminUrl("/admin")}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors font-bold text-primary"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <Icon name="layout-dashboard" size={16} />
+                      Admin Dashboard
+                    </a>
+                  ) : (
+                    <Link
+                      href="/account/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors font-semibold text-primary"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <Icon name="layout-dashboard" size={16} />
+                      My Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/account/profile"
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors"

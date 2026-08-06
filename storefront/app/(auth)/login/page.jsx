@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
 import { Icon } from "@/components/ui/icon";
+import { getAdminUrl, isAdminUser } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +29,21 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
       toast.success("Welcome back!");
-      router.push("/account/dashboard");
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const from = searchParams.get("from");
+
+      if (from) {
+        if (from.startsWith("http")) {
+          window.location.href = from;
+        } else {
+          router.push(from);
+        }
+      } else if (isAdminUser(data.user)) {
+        window.location.href = getAdminUrl("/admin");
+      } else {
+        router.push("/account/dashboard");
+      }
     } catch (err) {
       toast.error(err.message || "Invalid credentials");
     } finally {

@@ -7,11 +7,13 @@ import { api } from "@/lib/api";
 import { getAdminUrl } from "@/lib/utils";
 
 function getRoleMeta(roles = []) {
-  if (roles.includes("SUPER_ADMIN") || roles.includes("ADMIN") || roles.includes("SUB_ADMIN")) {
+  const upperRoles = roles.map((r) => r.toUpperCase());
+  if (upperRoles.some((r) => ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"].includes(r))) {
+    const isSupplier = upperRoles.includes("SUPPLIER") || upperRoles.includes("VENDOR");
     return {
-      label: "Administrator",
-      discount: "Admin Pricing",
-      credit: "Full System Access",
+      label: isSupplier ? "Supplier Partner" : "Administrator",
+      discount: "System Access",
+      credit: "Full Management",
       badgeBg: "bg-purple-100 text-purple-700",
       isAdmin: true,
     };
@@ -30,9 +32,6 @@ function getRoleMeta(roles = []) {
   }
   if (roles.includes("PARLOUR")) {
     return { label: "Beauty Parlour", discount: "15-25% OFF", credit: "15 Days", badgeBg: "bg-pink-100 text-pink-700" };
-  }
-  if (roles.includes("SALESMAN")) {
-    return { label: "Sales Representative", discount: "Sales Partner", credit: "Internal", badgeBg: "bg-amber-100 text-amber-700" };
   }
   return { label: "Customer", discount: "Standard Member", credit: "Prepaid / COD", badgeBg: "bg-gray-100 text-gray-700" };
 }

@@ -37,7 +37,8 @@ function LoginForm() {
           router.push(from);
         }
       } else {
-        const isAdmin = data.user?.roles?.some(r => ["ADMIN", "SUPERADMIN", "SUPER_ADMIN", "SUB_ADMIN", "STAFF"].includes(r?.toUpperCase()));
+        const ADMIN_ROLES = ["ADMIN", "SUPERADMIN", "SUPER_ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"];
+        const isAdmin = data.user?.roles?.some(r => ADMIN_ROLES.includes(r?.toUpperCase())) || data.user?.permissions?.includes("*");
         if (isAdmin) {
           router.push("/admin");
         } else {

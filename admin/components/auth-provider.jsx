@@ -17,6 +17,18 @@ function AuthProvider({ children }) {
         const data = await api.get("/auth/me");
         const token = localStorage.getItem("erp_access_token");
         dispatch(setCredentials({ user: data, accessToken: token || "" }));
+
+        const roles = data.roles || [];
+        const permissions = data.permissions || [];
+        const ADMIN_ROLES = ["SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"];
+        const isAdmin = roles.some((r) => ADMIN_ROLES.includes(r?.toUpperCase())) || permissions.includes("*");
+
+        if (!isAdmin && typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+          const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000";
+          window.location.href = `${storefrontUrl}/account/dashboard`;
+          return;
+        }
+
         setHydrated(true);
       } catch {
         localStorage.removeItem("erp_access_token");

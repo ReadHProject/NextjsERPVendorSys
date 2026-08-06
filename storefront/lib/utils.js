@@ -33,3 +33,36 @@ export function getAdminUrl(path = "") {
   }
   return `${origin}/admin${path}`;
 }
+
+export function isAdminUser(user) {
+  if (!user) return false;
+  const roles = user.roles || [];
+  const permissions = user.permissions || [];
+
+  const ADMIN_ROLES = [
+    "SUPER_ADMIN",
+    "SUPERADMIN",
+    "ADMIN",
+    "SUB_ADMIN",
+    "STAFF",
+    "WAREHOUSE_MANAGER",
+    "SALESMAN",
+    "SUPPLIER",
+    "VENDOR",
+  ];
+
+  const hasAdminRole = roles.some((r) => ADMIN_ROLES.includes(r?.toUpperCase()));
+  const hasAdminPermission =
+    permissions.includes("*") ||
+    permissions.some((p) => typeof p === "string" && (p.startsWith("admin.") || p.includes("manage")));
+
+  return hasAdminRole || hasAdminPermission;
+}
+
+export function getDashboardUrl(user) {
+  if (isAdminUser(user)) {
+    return getAdminUrl("/admin");
+  }
+  return "/account/dashboard";
+}
+
