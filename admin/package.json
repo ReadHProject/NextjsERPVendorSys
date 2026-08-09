@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "npx next build",
-    "start": "npx next start -p 3001",
-    "lint": "npx next lint"
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.0",

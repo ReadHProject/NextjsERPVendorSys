@@ -1,10 +1,13 @@
-/** @type {import('next').NextConfig} */
+const path = require("path");
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1").replace(/\/api\/v1$/, "");
 
 const nextConfig = {
   assetPrefix: process.env.NODE_ENV === "production" ? "/admin-assets" : "",
   output: "standalone",
   reactStrictMode: true,
+  turbopack: {
+    root: path.resolve(__dirname, ".."),
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.amazonaws.com" },
