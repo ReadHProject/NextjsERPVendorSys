@@ -2,19 +2,31 @@
   "name": "multi-vendor-erp",
   "private": true,
   "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "backend",
+    "admin",
+    "storefront"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\" \"npm run dev:storefront\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:admin": "cd admin && npm run dev",
     "dev:storefront": "cd storefront && npm run dev",
-    "build": "cd admin && npm run build && cd ../storefront && npm run build",
+    "build": "npm run build --workspace=admin --workspace=storefront",
     "build:admin": "cd admin && npm run build",
     "build:storefront": "cd storefront && npm run build",
-    "lint": "cd admin && npm run lint && cd ../storefront && npm run lint",
+    "start": "node server.js",
+    "lint": "npm run lint --workspaces",
     "db:push": "cd backend && npm run db:push",
     "db:migrate": "cd backend && npm run db:migrate",
     "db:seed": "cd backend && npm run db:seed",
     "db:generate": "cd backend && npm run generate"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"
