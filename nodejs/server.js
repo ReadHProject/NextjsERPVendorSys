@@ -8,12 +8,25 @@ const next = require("next");
 const PORT = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== "production";
 
+function findRoot(startDir) {
+  let curr = startDir;
+  for (let i = 0; i < 4; i++) {
+    if (fs.existsSync(path.join(curr, "backend"))) {
+      return curr;
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+  return startDir;
+}
+
 async function main() {
   if (dev) {
     console.warn("[WARNING] Running server in DEV mode is not recommended.");
   }
 
-  const rootDir = fs.existsSync(path.join(__dirname, "../backend")) ? path.join(__dirname, "..") : __dirname;
+  const rootDir = findRoot(__dirname);
 
   const backendApp = require(path.join(rootDir, "backend/src/app"));
   const adminApp = next({ dev, dir: path.join(rootDir, "admin"), hostname: "0.0.0.0", port: PORT });
