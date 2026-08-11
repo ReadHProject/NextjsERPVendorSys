@@ -77,3 +77,29 @@ Once deployed, your domain routes will automatically map as follows:
 - `https://yourdomain.com/admin/*` $\rightarrow$ Admin ERP Dashboard
 - `https://yourdomain.com/api/v1/*` $\rightarrow$ Backend Express API
 - `https://yourdomain.com/uploads/*` $\rightarrow$ Uploaded Assets / Media
+
+---
+
+## 5. Troubleshooting: `Error: Cannot find module '.../server.js'`
+
+If LiteSpeed (`lsnode.js`) produces:
+`Error: Cannot find module '/home/u558169033/domains/velvetvenues.co.in/.builds/current/nodejs/server.js'`
+
+Follow these steps to resolve:
+
+1. **Verify `server.js` was pushed & deployed**:
+   - Ensure `server.js` exists in the repository root and is committed to Git.
+   - If deploying via File Manager / ZIP upload, verify `server.js` is present directly inside the app root folder.
+
+2. **Check Hostinger hPanel Settings**:
+   - Go to **hPanel** $\rightarrow$ **Websites** $\rightarrow$ **Node.js**.
+   - **Application Root**: Check that this points to your Node application root (e.g. `public_html` or `.builds/current/nodejs`).
+   - **Application Startup File**: Must be set to `server.js`.
+   - **Node.js Version**: Select `20.x` or `18.x`.
+
+3. **Re-trigger Build / Redeploy**:
+   - In Hostinger Git / Deployment section, click **Deploy / Build**.
+   - If the build failed previously during `npm install` or `npm run build`, Hostinger might not have generated `.builds/current/nodejs` properly.
+   - Ensure the build command is:
+     `npm install && NEXT_PUBLIC_API_URL=https://velvetvenues.co.in/api/v1 npm run build`
+
