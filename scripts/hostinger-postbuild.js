@@ -7,13 +7,30 @@ function ensureDir(dir) {
   }
 }
 
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+
+  if (isDirectory) {
+    ensureDir(dest);
+    fs.readdirSync(src).forEach((childItemName) => {
+      // Exclude recursive .next or cache folders to prevent infinite nesting
+      if (childItemName === ".next" || childItemName === "cache" || childItemName === ".git") return;
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else if (exists) {
+    fs.copyFileSync(src, dest);
+  }
+}
+
 // 1. Ensure required output folders exist
 ensureDir(".next");
 ensureDir("nodejs");
 ensureDir(".next/nodejs");
 
 // 2. Copy entry point files across root, nodejs, and .next build target directories
-const filesToCopy = ["server.js", "index.js", "app.js"];
+const filesToCopy = ["server.js", "index.js", "app.js", "package.json"];
 filesToCopy.forEach((file) => {
   if (fs.existsSync(file)) {
     fs.copyFileSync(file, path.join("nodejs", file));
@@ -22,4 +39,16 @@ filesToCopy.forEach((file) => {
   }
 });
 
-console.log("[POSTBUILD] Synced server entry points into .next, .next/nodejs, and nodejs build directories.");
+// 3. Copy application folders into .next so if Hostinger deploys strictly .next as output directory, all apps exist!
+const dirsToCopy = ["backend", "admin", "storefront", "node_modules"];
+dirsToCopy.forEach((dir) => {
+  if (fs.existsSync(dir)) {
+    try {
+      copyRecursiveSync(dir, path.join(".next", dir));
+    } catch (e) {
+      console.warn(`[POSTBUILD] Warning copying ${dir} to .next:`, e.message);
+    }
+  }
+});
+
+console.log("[POSTBUILD] Synced entire monorepo bundle into .next output directory for Hostinger deployment.");
