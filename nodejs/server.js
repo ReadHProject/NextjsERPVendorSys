@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 require("dotenv").config({ path: path.join(__dirname, "../backend/.env") });
 const express = require("express");
@@ -12,10 +13,11 @@ async function main() {
     console.warn("[WARNING] Running server in DEV mode is not recommended.");
   }
 
-  const backendApp = require("../backend/src/app");
+  const rootDir = fs.existsSync(path.join(__dirname, "../backend")) ? path.join(__dirname, "..") : __dirname;
 
-  const adminApp = next({ dev, dir: path.join(__dirname, "../admin"), hostname: "0.0.0.0", port: PORT });
-  const storeApp = next({ dev, dir: path.join(__dirname, "../storefront"), hostname: "0.0.0.0", port: PORT });
+  const backendApp = require(path.join(rootDir, "backend/src/app"));
+  const adminApp = next({ dev, dir: path.join(rootDir, "admin"), hostname: "0.0.0.0", port: PORT });
+  const storeApp = next({ dev, dir: path.join(rootDir, "storefront"), hostname: "0.0.0.0", port: PORT });
 
   await adminApp.prepare();
   await storeApp.prepare();
