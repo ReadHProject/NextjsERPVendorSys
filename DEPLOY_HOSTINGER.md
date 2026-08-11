@@ -39,7 +39,7 @@ In Hostinger hPanel Node.js app setup:
 
 1. **Build Command**:
    ```bash
-   npm install && NEXT_PUBLIC_API_URL=https://yourdomain.com/api/v1 npm run build && npm run db:push
+   npm run build
    ```
 2. **Startup Command**:
    ```bash
@@ -100,6 +100,6 @@ Follow these steps to resolve:
 3. **Re-trigger Build / Redeploy**:
    - In Hostinger Git / Deployment section, click **Deploy / Build**.
    - If the build failed previously during `npm install` or `npm run build`, Hostinger might not have generated `.builds/current/nodejs` properly.
-   - Ensure the build command is:
-     `npm install && NEXT_PUBLIC_API_URL=https://velvetvenues.co.in/api/v1 npm run build`
+   - Ensure the build command is set to:
+     `npm run build`
 
