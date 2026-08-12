@@ -15,8 +15,7 @@ function copyRecursiveSync(src, dest) {
   if (isDirectory) {
     ensureDir(dest);
     fs.readdirSync(src).forEach((childItemName) => {
-      // Exclude recursive .next or cache folders to prevent infinite nesting
-      if (childItemName === ".next" || childItemName === "cache" || childItemName === ".git") return;
+      if (childItemName === ".next" || childItemName === "cache" || childItemName === ".git" || childItemName === "nodejs") return;
       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
     });
   } else if (exists) {
@@ -39,16 +38,17 @@ filesToCopy.forEach((file) => {
   }
 });
 
-// 3. Copy application folders into .next so if Hostinger deploys strictly .next as output directory, all apps exist!
-const dirsToCopy = ["backend", "admin", "storefront", "node_modules"];
+// 3. Sync backend, admin, storefront into BOTH nodejs/ and .next/
+const dirsToCopy = ["backend", "admin", "storefront"];
 dirsToCopy.forEach((dir) => {
   if (fs.existsSync(dir)) {
     try {
+      copyRecursiveSync(dir, path.join("nodejs", dir));
       copyRecursiveSync(dir, path.join(".next", dir));
     } catch (e) {
-      console.warn(`[POSTBUILD] Warning copying ${dir} to .next:`, e.message);
+      console.warn(`[POSTBUILD] Warning copying ${dir}:`, e.message);
     }
   }
 });
 
-console.log("[POSTBUILD] Synced entire monorepo bundle into .next output directory for Hostinger deployment.");
+console.log("[POSTBUILD] Synced entire monorepo bundle into nodejs/ and .next/ output directories for Hostinger deployment.");
