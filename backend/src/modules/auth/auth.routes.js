@@ -82,7 +82,7 @@ router.post("/send-otp", otpLimiter, validate(sendOtpSchema), async (req, res, n
       if (!existingUser || existingUser.status !== "ACTIVE") {
         throw new UnauthorizedError("Salesman account not found or inactive for this phone number");
       }
-      const isSalesman = existingUser.roles.some((r) => ["SALESMAN", "SUPER_ADMIN", "ADMIN"].includes(r.role.name));
+      const isSalesman = existingUser.roles.some((r) => ["SALESMAN", "SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER"].includes(r.role.name?.toUpperCase()));
       if (!isSalesman) {
         throw new UnauthorizedError("Account is not authorized as Salesman");
       }
@@ -195,7 +195,7 @@ router.post("/verify-otp", otpLimiter, validate(verifyOtpSchema), async (req, re
     }
 
     if (otpRecord.role === "SALESMAN") {
-      const isSalesman = user.roles.some((r) => ["SALESMAN", "SUPER_ADMIN", "ADMIN"].includes(r.role.name));
+      const isSalesman = user.roles.some((r) => ["SALESMAN", "SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER"].includes(r.role.name?.toUpperCase()));
       if (!isSalesman) {
         throw new UnauthorizedError("Account is not authorized as Salesman");
       }

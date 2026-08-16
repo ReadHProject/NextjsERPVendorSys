@@ -3,7 +3,11 @@ const API_BASE = typeof window !== "undefined"
   : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1");
 
 async function request(path, options = {}) {
-  const url = `${API_BASE}${path}`;
+  let cleanPath = path.startsWith("/") ? path : `/${path}`;
+  if (cleanPath.startsWith("/api/v1/")) {
+    cleanPath = cleanPath.replace(/^\/api\/v1/, "");
+  }
+  const url = `${API_BASE}${cleanPath}`;
 
   let token = null;
   if (typeof window !== "undefined") {
@@ -28,11 +32,28 @@ async function request(path, options = {}) {
     delete config.headers["Content-Type"];
   }
 
-  const res = await fetch(url, config);
-  const json = await res.json();
+  let res;
+  try {
+    res = await fetch(url, config);
+  } catch (netErr) {
+    const err = new Error("Unable to connect to server. Please check if the backend is running.");
+    err.status = 503;
+    throw err;
+  }
+
+  let json = {};
+  try {
+    json = await res.json();
+  } catch {
+    // Response was not JSON
+  }
 
   if (!res.ok) {
-    const err = new Error(json.error?.message || "Request failed");
+    let message = json.error?.message || json.message;
+    if (!message || message === "Route not found" || message === "API route not found" || res.status === 404) {
+      message = "Service endpoint not found or backend server is unreachable. Please check backend status.";
+    }
+    const err = new Error(message);
     err.status = res.status;
     err.code = json.error?.code;
     throw err;
