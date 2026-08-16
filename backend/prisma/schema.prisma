@@ -255,12 +255,16 @@ model UserRole {
 
 model OtpToken {
   id        String   @id @default(cuid())
-  userId    String
+  mobile    String
+  role      String   @default("CUSTOMER")
+  userId    String?
   code      String
   expiresAt DateTime
   consumed  Boolean  @default(false)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([mobile])
 }
 
 model PasswordReset {

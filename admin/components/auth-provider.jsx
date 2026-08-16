@@ -14,6 +14,15 @@ function AuthProvider({ children }) {
   useEffect(() => {
     async function hydrate() {
       try {
+        if (typeof window !== "undefined") {
+          const searchParams = new URLSearchParams(window.location.search);
+          const urlToken = searchParams.get("token");
+          if (urlToken) {
+            localStorage.setItem("erp_access_token", urlToken);
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+        }
         const data = await api.get("/auth/me");
         const token = localStorage.getItem("erp_access_token");
         dispatch(setCredentials({ user: data, accessToken: token || "" }));

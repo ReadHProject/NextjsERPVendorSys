@@ -2,26 +2,26 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Sparkles, Phone, KeyRound, Mail, Lock, ArrowLeft, Copy, Check } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { Briefcase, Phone, KeyRound, Mail, Lock, ArrowLeft, Copy, Check } from "lucide-react";
 import { api } from "@/lib/api";
-import { toast } from "@/components/ui/toaster";
-import { getAdminUrl, isAdminUser } from "@/lib/utils";
+import { setCredentials } from "@/store/slices/authSlice";
 
-export default function CustomerLoginPage() {
+export function StaffLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
 
-  const [mode, setMode] = useState("otp"); // "otp" | "password"
-
-  // OTP State
+  const [activeTab, setActiveTab] = useState("salesman"); // "salesman" | "admin"
+  
+  // Salesman State
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [devOtp, setDevOtp] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Email State
+  // Admin State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -34,15 +34,13 @@ export default function CustomerLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const data = await api.post("/auth/send-otp", { mobile, role: "CUSTOMER" });
+      const data = await api.post("/auth/send-otp", { mobile, role: "SALESMAN" });
       setOtpSent(true);
       if (data?.otp) {
         setDevOtp(data.otp);
       }
-      toast.success("OTP sent successfully");
     } catch (err) {
       setError(err.message || "Failed to send OTP");
-      toast.error(err.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -58,19 +56,17 @@ export default function CustomerLoginPage() {
         localStorage.setItem("erp_access_token", data.accessToken);
       }
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        dispatch(setCredentials({ user: data.user, accessToken: data.accessToken }));
       }
-      toast.success("Welcome back!");
       handleRedirect(data);
     } catch (err) {
       setError(err.message || "Invalid or expired OTP");
-      toast.error(err.message || "Invalid or expired OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordLogin = async (e) => {
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -80,13 +76,11 @@ export default function CustomerLoginPage() {
         localStorage.setItem("erp_access_token", data.accessToken);
       }
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        dispatch(setCredentials({ user: data.user, accessToken: data.accessToken }));
       }
-      toast.success("Welcome back!");
       handleRedirect(data);
     } catch (err) {
-      setError(err.message || "Invalid email or password");
-      toast.error(err.message || "Invalid email or password");
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -96,14 +90,21 @@ export default function CustomerLoginPage() {
     const from = searchParams.get("from");
     if (from) {
       if (from.startsWith("http")) {
-        window.location.href = from;
+        const url = new URL(from);
+        url.searchParams.set("token", data.accessToken);
+        window.location.href = url.toString();
       } else {
         router.push(from);
       }
-    } else if (isAdminUser(data.user)) {
-      window.location.href = getAdminUrl(`/admin?token=${data.accessToken}`);
     } else {
-      router.push("/account/dashboard");
+      const ADMIN_ROLES = ["ADMIN", "SUPERADMIN", "SUPER_ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"];
+      const isAdmin = data.user?.roles?.some((r) => ADMIN_ROLES.includes(r?.toUpperCase())) || data.user?.permissions?.includes("*");
+      if (isAdmin) {
+        router.push("/admin");
+      } else {
+        const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000";
+        window.location.href = `${storefrontUrl}/account/dashboard?token=${data.accessToken}`;
+      }
     }
   };
 
@@ -121,11 +122,43 @@ export default function CustomerLoginPage() {
       <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-stone-100 shadow-xl shadow-stone-200/50 transition-all">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4 text-rose-500 shadow-xs border border-rose-100/50">
-            <Sparkles className="w-7 h-7" />
+          <div className="w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4 text-rose-600 shadow-xs border border-rose-100/50">
+            <Briefcase className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Welcome Back</h1>
-          <p className="text-stone-500 text-sm mt-1">Sign in to access your luxury account</p>
+          <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Staff Portal</h1>
+          <p className="text-stone-500 text-sm mt-1">Sign in to access your staff dashboard</p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="bg-stone-100 p-1.5 rounded-2xl flex gap-1.5 mb-6">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("salesman");
+              setError("");
+            }}
+            className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+              activeTab === "salesman"
+                ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
+                : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
+            }`}
+          >
+            Salesman
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("admin");
+              setError("");
+            }}
+            className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+              activeTab === "admin"
+                ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
+                : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
+            }`}
+          >
+            Admin
+          </button>
         </div>
 
         {/* Error Alert */}
@@ -135,14 +168,14 @@ export default function CustomerLoginPage() {
           </div>
         )}
 
-        {/* OTP Flow */}
-        {mode === "otp" && (
+        {/* Salesman Flow */}
+        {activeTab === "salesman" && (
           <div>
             {!otpSent ? (
               <form onSubmit={handleSendOtp} className="space-y-5">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-                    Phone Number
+                    Salesman Phone Number
                   </label>
                   <div className="relative">
                     <Phone className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -167,7 +200,7 @@ export default function CustomerLoginPage() {
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-5">
-                {/* Dev OTP Notice */}
+                {/* On-Screen Dev OTP Notice */}
                 {devOtp && (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-amber-800 text-sm flex items-center justify-between">
                     <div>
@@ -227,28 +260,15 @@ export default function CustomerLoginPage() {
                 </div>
               </form>
             )}
-
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("password");
-                  setError("");
-                }}
-                className="text-rose-500 hover:text-rose-600 text-xs font-semibold hover:underline"
-              >
-                Sign in with Email & Password instead
-              </button>
-            </div>
           </div>
         )}
 
-        {/* Password Flow */}
-        {mode === "password" && (
-          <form onSubmit={handlePasswordLogin} className="space-y-5">
+        {/* Admin Flow */}
+        {activeTab === "admin" && (
+          <form onSubmit={handleAdminLogin} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-                Email Address
+                Admin Email
               </label>
               <div className="relative">
                 <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -256,7 +276,7 @@ export default function CustomerLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="admin@setup.com"
                   required
                   className="w-full h-12 pl-11 pr-4 rounded-xl border border-stone-200 bg-white text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"
                 />
@@ -264,9 +284,14 @@ export default function CustomerLoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
+                  Password
+                </label>
+                <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-rose-500 hover:underline font-medium">
+                  Forgot password?
+                </a>
+              </div>
               <div className="relative">
                 <Lock className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
@@ -285,39 +310,20 @@ export default function CustomerLoginPage() {
               disabled={loading}
               className="w-full h-12 rounded-xl bg-rose-500 hover:bg-rose-600 active:scale-[0.99] text-white font-semibold text-sm transition-all shadow-md shadow-rose-500/20 disabled:opacity-50 disabled:pointer-events-none"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Signing in..." : "Login as Admin"}
             </button>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("otp");
-                  setError("");
-                }}
-                className="text-rose-500 hover:text-rose-600 text-xs font-semibold hover:underline"
-              >
-                Sign in with Phone OTP instead
-              </button>
-            </div>
           </form>
         )}
 
-        {/* Footer Links */}
-        <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between text-xs">
-          <Link
-            href="/store"
-            className="inline-flex items-center gap-1.5 text-stone-500 hover:text-stone-800 font-medium transition-colors"
+        {/* Footer Back Link */}
+        <div className="mt-8 pt-6 border-t border-stone-100 text-center">
+          <a
+            href={process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000"}
+            className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-800 text-xs font-medium transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-4 h-4" />
             Back to Home
-          </Link>
-          <p className="text-stone-500">
-            Need an account?{" "}
-            <Link href="/register" className="text-rose-500 font-semibold hover:underline">
-              Create one
-            </Link>
-          </p>
+          </a>
         </div>
       </div>
     </div>

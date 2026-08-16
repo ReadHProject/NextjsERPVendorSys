@@ -33,4 +33,16 @@ const strictLimiter = rateLimit({
   },
 });
 
-module.exports = { apiLimiter, authLimiter, strictLimiter };
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => `${req.ip}:${req.body?.mobile || ""}`,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: { code: "RATE_LIMIT", message: "Too many OTP requests, please try again later" },
+  },
+});
+
+module.exports = { apiLimiter, authLimiter, strictLimiter, otpLimiter };

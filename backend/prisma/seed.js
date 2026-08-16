@@ -220,12 +220,12 @@ async function main() {
     { name: "Super Admin", email: "admin@demo.local", passwordHash: pw, role: "SUPER_ADMIN" },
     { name: "Sub Admin", email: "subadmin@demo.local", passwordHash: pw, role: "SUB_ADMIN" },
     { name: "Warehouse Manager", email: "wh@demo.local", passwordHash: pw, role: "WAREHOUSE_MANAGER" },
-    { name: "Salesman", email: "salesman@demo.local", passwordHash: pw, role: "SALESMAN" },
+    { name: "Salesman", email: "salesman@demo.local", mobile: "9876543210", passwordHash: pw, role: "SALESMAN" },
     { name: "Wholesaler User", email: "wholesaler@demo.local", passwordHash: pw, role: "WHOLESALER" },
     { name: "Dealer User", email: "dealer@demo.local", passwordHash: pw, role: "DEALER" },
     { name: "Retailer User", email: "retailer@demo.local", passwordHash: pw, role: "RETAILER" },
     { name: "Parlour User", email: "parlour@demo.local", passwordHash: pw, role: "PARLOUR" },
-    { name: "Customer User", email: "customer@demo.local", passwordHash: userPw, role: "CUSTOMER" },
+    { name: "Customer User", email: "customer@demo.local", mobile: "9123456789", passwordHash: userPw, role: "CUSTOMER" },
     { name: "Online User", email: "online@demo.local", passwordHash: userPw, role: "ONLINE" },
     { name: "MRP Member", email: "mrp@demo.local", passwordHash: userPw, role: "MRP_MEMBER" },
     { name: "Supplier Co", email: "supplier@demo.local", passwordHash: pw, role: "SUPPLIER" },
@@ -233,8 +233,8 @@ async function main() {
   for (const u of users) {
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
-      create: { name: u.name, email: u.email, passwordHash: u.passwordHash, status: UserStatus.ACTIVE },
+      update: { ...(u.mobile && { mobile: u.mobile }) },
+      create: { name: u.name, email: u.email, mobile: u.mobile || null, passwordHash: u.passwordHash, status: UserStatus.ACTIVE },
     });
     if (roleRecords[u.role]) {
       await prisma.userRole.upsert({

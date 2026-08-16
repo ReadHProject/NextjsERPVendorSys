@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { StaffLoginForm } from "@/components/staff-login-form";
 
-export default function LoginPage() {
+export default function StaffLoginPage() {
   return (
     <Suspense
       fallback={
