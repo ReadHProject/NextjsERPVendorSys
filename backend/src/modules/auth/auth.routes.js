@@ -78,16 +78,19 @@ router.post("/send-otp", otpLimiter, validate(sendOtpSchema), async (req, res, n
       include: { roles: { include: { role: true } } },
     });
 
+    if (!existingUser) {
+      throw new ValidationError("Mobile number not registered. Please enter a registered mobile number.");
+    }
+
+    if (existingUser.status !== "ACTIVE") {
+      throw new UnauthorizedError("Account is not active");
+    }
+
     if (role === "SALESMAN") {
-      if (!existingUser || existingUser.status !== "ACTIVE") {
-        throw new UnauthorizedError("Salesman account not found or inactive for this phone number");
-      }
       const isSalesman = existingUser.roles.some((r) => ["SALESMAN", "SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER"].includes(r.role.name?.toUpperCase()));
       if (!isSalesman) {
         throw new UnauthorizedError("Account is not authorized as Salesman");
       }
-    } else if (existingUser && existingUser.status !== "ACTIVE") {
-      throw new UnauthorizedError("Account is not active");
     }
 
     await prisma.otpToken.updateMany({
@@ -111,16 +114,14 @@ router.post("/send-otp", otpLimiter, validate(sendOtpSchema), async (req, res, n
     try {
       await smsService.sendOtpSms(normalized, code);
     } catch (err) {
-      if (process.env.NODE_ENV === "production") {
-        throw new BadRequestError("Failed to send OTP SMS. Please try again.");
-      }
+      console.warn("SMS send warning:", err.message);
     }
 
     res.json({
       success: true,
       data: {
         message: "OTP sent successfully",
-        ...(process.env.NODE_ENV !== "production" && { otp: code }),
+        otp: code,
       },
     });
   } catch (error) {
@@ -160,34 +161,7 @@ router.post("/verify-otp", otpLimiter, validate(verifyOtpSchema), async (req, re
     });
 
     if (!user) {
-      if (otpRecord.role === "SALESMAN") {
-        throw new UnauthorizedError("Salesman account not found");
-      }
-      const customerRole = await prisma.role.findUnique({ where: { name: "CUSTOMER" } });
-      const placeholderEmail = `${normalized}@customer.local`;
-      const placeholderName = `Customer ${normalized.slice(-4)}`;
-      const randomPass = crypto.randomBytes(24).toString("hex");
-      const passwordHash = await hashPassword(randomPass);
-
-      try {
-        user = await prisma.user.create({
-          data: {
-            name: placeholderName,
-            email: placeholderEmail,
-            mobile: normalized,
-            passwordHash,
-            status: "ACTIVE",
-            roles: customerRole ? { create: { roleId: customerRole.id } } : undefined,
-          },
-          include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } },
-        });
-      } catch (e) {
-        user = await prisma.user.findUnique({
-          where: { mobile: normalized },
-          include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } },
-        });
-        if (!user) throw e;
-      }
+      throw new ValidationError("Mobile number not registered. Please enter a registered mobile number.");
     }
 
     if (user.status !== "ACTIVE") {

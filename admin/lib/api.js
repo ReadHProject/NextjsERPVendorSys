@@ -1,13 +1,25 @@
-const API_BASE = typeof window !== "undefined"
-  ? "/api/v1"
-  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1");
+function getApiBase() {
+  let url = process.env.NEXT_PUBLIC_API_URL;
+  if (url && !url.includes("onrender.com")) {
+    return url;
+  }
+  if (typeof window !== "undefined") {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:5000/api/v1`;
+  }
+  return "http://localhost:5000/api/v1";
+}
 
 async function request(path, options = {}) {
   let cleanPath = path.startsWith("/") ? path : `/${path}`;
   if (cleanPath.startsWith("/api/v1/")) {
     cleanPath = cleanPath.replace(/^\/api\/v1/, "");
   }
-  const url = `${API_BASE}${cleanPath}`;
+  const baseUrl = getApiBase();
+  const url = `${baseUrl}${cleanPath}`;
+
+  console.log(`[API Request] ${options.method || "GET"} -> ${url}`);
 
   let token = null;
   if (typeof window !== "undefined") {
@@ -36,6 +48,7 @@ async function request(path, options = {}) {
   try {
     res = await fetch(url, config);
   } catch (netErr) {
+    console.error("[API Network Error]", url, netErr);
     const err = new Error("Unable to connect to server. Please check if the backend is running.");
     err.status = 503;
     throw err;
@@ -44,11 +57,14 @@ async function request(path, options = {}) {
   let json = {};
   try {
     json = await res.json();
-  } catch {
-    // Response was not JSON
+  } catch (parseErr) {
+    console.error("[API JSON Parse Error]", url, parseErr);
   }
 
   if (!res.ok) {
+    if (res.status >= 500) {
+      console.error("[API Server Error]", url, res.status, json);
+    }
     if (res.status === 401 && !cleanPath.includes("/auth/")) {
       localStorage.removeItem("erp_access_token");
       if (typeof window !== "undefined") {
@@ -56,8 +72,11 @@ async function request(path, options = {}) {
       }
     }
     let message = json.error?.message || json.message;
-    if (!message || message === "Route not found" || message === "API route not found" || res.status === 404) {
+    if (res.status === 404 || message === "Route not found" || message === "API route not found") {
       message = "Service endpoint not found or backend server is unreachable. Please check backend status.";
+    }
+    if (!message) {
+      message = `Request failed (${res.status})`;
     }
     const err = new Error(message);
     err.status = res.status;

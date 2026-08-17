@@ -203,7 +203,7 @@ export default function StaffLoginPage() {
                 {devOtp && (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-amber-800 text-sm flex items-center justify-between">
                     <div>
-                      <span className="font-semibold block text-xs uppercase tracking-wider text-amber-600">Demo Mode OTP</span>
+                      <span className="font-semibold block text-xs uppercase tracking-wider text-amber-600">On-Screen OTP</span>
                       <span className="text-base font-bold font-mono tracking-widest text-amber-900">{devOtp}</span>
                     </div>
                     <button

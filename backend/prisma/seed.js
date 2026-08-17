@@ -159,7 +159,7 @@ const ROLE_PERMS = {
   MRP_MEMBER: ["product.read", "product.list", "order.create", "order.read", "cart.create", "cart.read", "cart.update", "cart.delete", "wishlist.create", "wishlist.read", "wishlist.delete", "ticket.create", "ticket.read"],
   SUPPLIER: ["supplier.read", "product.read", "order.read", "purchase.read", "vendor.read"],
   WAREHOUSE_MANAGER: ["inventory.create", "inventory.read", "inventory.update", "warehouse.read", "warehouse.update", "barcode.create", "barcode.read", "barcode.update", "dispatch.create", "dispatch.read", "dispatch.update", "return.read", "return.update", "product.read", "order.read", "purchase.read", "stockalert.read", "stockalert.update"],
-  SALESMAN: ["pos.create", "pos.read", "pos.update", "product.read", "product.list", "inventory.read", "order.create", "order.read", "commission.read", "salesperson.read"]
+  SALESMAN: ["dashboard.read", "pos.create", "pos.read", "pos.update", "product.read", "product.list", "inventory.read", "order.create", "order.read", "commission.read", "salesperson.read"]
 };
 
 async function main() {

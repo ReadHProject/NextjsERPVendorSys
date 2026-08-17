@@ -3,6 +3,9 @@ const { ForbiddenError } = require("../utils/errors");
 function hasPermission(user, code) {
   if (!user) return false;
   if (user.permissions.includes("*")) return true;
+  if (code === "dashboard.read" && user.roles.some((r) => ["SALESMAN", "STAFF", "ADMIN", "SUPER_ADMIN", "SUPERADMIN", "SUB_ADMIN", "WAREHOUSE_MANAGER"].includes(r?.toUpperCase()))) {
+    return true;
+  }
   return user.permissions.includes(code);
 }
 

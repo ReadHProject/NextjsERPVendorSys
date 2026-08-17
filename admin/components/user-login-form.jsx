@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Sparkles, Phone, KeyRound, Mail, Lock, ArrowLeft, Copy, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
-import { getAdminUrl, isAdminUser } from "@/lib/utils";
+import { getStorefrontUrl } from "@/lib/utils";
 
-export default function CustomerLoginPage() {
+const ADMIN_ROLES = ["SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"];
+
+function isAdminUser(user) {
+  if (!user) return false;
+  const roles = user.roles || [];
+  const permissions = user.permissions || [];
+  return (
+    roles.some((r) => ADMIN_ROLES.includes(r?.toUpperCase())) ||
+    permissions.includes("*")
+  );
+}
+
+export function UserLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -21,7 +32,7 @@ export default function CustomerLoginPage() {
   const [devOtp, setDevOtp] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Email State
+  // Password State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -36,9 +47,7 @@ export default function CustomerLoginPage() {
     try {
       const data = await api.post("/auth/send-otp", { mobile, role: "CUSTOMER" });
       setOtpSent(true);
-      if (data?.otp) {
-        setDevOtp(data.otp);
-      }
+      if (data?.otp) setDevOtp(data.otp);
       toast.success("OTP sent successfully");
     } catch (err) {
       setError(err.message || "Failed to send OTP");
@@ -56,9 +65,6 @@ export default function CustomerLoginPage() {
       const data = await api.post("/auth/verify-otp", { mobile, code: otp });
       if (data.accessToken) {
         localStorage.setItem("erp_access_token", data.accessToken);
-      }
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
       }
       toast.success("Welcome back!");
       handleRedirect(data);
@@ -79,9 +85,6 @@ export default function CustomerLoginPage() {
       if (data.accessToken) {
         localStorage.setItem("erp_access_token", data.accessToken);
       }
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
       toast.success("Welcome back!");
       handleRedirect(data);
     } catch (err) {
@@ -100,10 +103,12 @@ export default function CustomerLoginPage() {
       } else {
         router.push(from);
       }
-    } else if (isAdminUser(data.user)) {
-      window.location.href = getAdminUrl(`/admin?token=${data.accessToken}`);
+      return;
+    }
+    if (isAdminUser(data.user)) {
+      router.push("/admin");
     } else {
-      router.push("/account/dashboard");
+      window.location.href = getStorefrontUrl("/account/dashboard");
     }
   };
 
@@ -125,7 +130,7 @@ export default function CustomerLoginPage() {
             <Sparkles className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Welcome Back</h1>
-          <p className="text-stone-500 text-sm mt-1">Sign in to access your luxury account</p>
+          <p className="text-stone-500 text-sm mt-1">Sign in to access your account</p>
         </div>
 
         {/* Error Alert */}
@@ -150,7 +155,7 @@ export default function CustomerLoginPage() {
                       type="tel"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
-                      placeholder="Enter 10-digit number"
+                      placeholder="e.g. 9123456789"
                       maxLength={10}
                       required
                       className="w-full h-12 pl-11 pr-4 rounded-xl border border-stone-200 bg-white text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"
@@ -167,7 +172,6 @@ export default function CustomerLoginPage() {
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-5">
-                {/* Dev OTP Notice */}
                 {devOtp && (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-amber-800 text-sm flex items-center justify-between">
                     <div>
@@ -184,7 +188,6 @@ export default function CustomerLoginPage() {
                     </button>
                   </div>
                 )}
-
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
                     Enter OTP
@@ -202,7 +205,6 @@ export default function CustomerLoginPage() {
                     />
                   </div>
                 </div>
-
                 <button
                   type="submit"
                   disabled={loading || otp.length < 6}
@@ -210,16 +212,10 @@ export default function CustomerLoginPage() {
                 >
                   {loading ? "Verifying..." : "Verify & Login"}
                 </button>
-
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => {
-                      setOtpSent(false);
-                      setOtp("");
-                      setDevOtp("");
-                      setError("");
-                    }}
+                    onClick={() => { setOtpSent(false); setOtp(""); setDevOtp(""); setError(""); }}
                     className="text-stone-500 hover:text-stone-800 text-xs font-semibold hover:underline"
                   >
                     Change Phone Number
@@ -231,10 +227,7 @@ export default function CustomerLoginPage() {
             <div className="mt-6 text-center">
               <button
                 type="button"
-                onClick={() => {
-                  setMode("password");
-                  setError("");
-                }}
+                onClick={() => { setMode("password"); setError(""); }}
                 className="text-rose-500 hover:text-rose-600 text-xs font-semibold hover:underline"
               >
                 Sign in with Email & Password instead
@@ -262,7 +255,6 @@ export default function CustomerLoginPage() {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
                 Password
@@ -279,7 +271,6 @@ export default function CustomerLoginPage() {
                 />
               </div>
             </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -287,14 +278,10 @@ export default function CustomerLoginPage() {
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
-
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => {
-                  setMode("otp");
-                  setError("");
-                }}
+                onClick={() => { setMode("otp"); setError(""); }}
                 className="text-rose-500 hover:text-rose-600 text-xs font-semibold hover:underline"
               >
                 Sign in with Phone OTP instead
@@ -303,21 +290,21 @@ export default function CustomerLoginPage() {
           </form>
         )}
 
-        {/* Footer Links */}
+        {/* Footer */}
         <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between text-xs">
-          <Link
-            href="/store"
+          <a
+            href={getStorefrontUrl("/store")}
             className="inline-flex items-center gap-1.5 text-stone-500 hover:text-stone-800 font-medium transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Home
-          </Link>
-          <p className="text-stone-500">
-            Need an account?{" "}
-            <Link href="/register" className="text-rose-500 font-semibold hover:underline">
-              Create one
-            </Link>
-          </p>
+            Back to Store
+          </a>
+          <a
+            href="/staff/login"
+            className="text-stone-500 hover:text-rose-500 font-semibold transition-colors"
+          >
+            Staff / Admin Login →
+          </a>
         </div>
       </div>
     </div>

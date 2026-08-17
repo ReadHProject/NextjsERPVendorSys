@@ -183,7 +183,7 @@ export function StaffLoginForm() {
                       type="tel"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
-                      placeholder="Enter 10-digit number"
+                      placeholder="e.g. 9876543210"
                       maxLength={10}
                       required
                       className="w-full h-12 pl-11 pr-4 rounded-xl border border-stone-200 bg-white text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"
@@ -204,7 +204,7 @@ export function StaffLoginForm() {
                 {devOtp && (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-amber-800 text-sm flex items-center justify-between">
                     <div>
-                      <span className="font-semibold block text-xs uppercase tracking-wider text-amber-600">Demo Mode OTP</span>
+                      <span className="font-semibold block text-xs uppercase tracking-wider text-amber-600">On-Screen OTP</span>
                       <span className="text-base font-bold font-mono tracking-widest text-amber-900">{devOtp}</span>
                     </div>
                     <button
