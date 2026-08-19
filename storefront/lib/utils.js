@@ -39,22 +39,17 @@ export function isAdminUser(user) {
   const roles = user.roles || [];
   const permissions = user.permissions || [];
 
-  const ADMIN_ROLES = [
+  const STRICT_ADMIN_ROLES = [
     "SUPER_ADMIN",
     "SUPERADMIN",
     "ADMIN",
     "SUB_ADMIN",
-    "STAFF",
-    "WAREHOUSE_MANAGER",
-    "SALESMAN",
-    "SUPPLIER",
-    "VENDOR",
   ];
 
-  const hasAdminRole = roles.some((r) => ADMIN_ROLES.includes(r?.toUpperCase()));
+  const hasAdminRole = roles.some((r) => STRICT_ADMIN_ROLES.includes(r?.toUpperCase()));
   const hasAdminPermission =
     permissions.includes("*") ||
-    permissions.some((p) => typeof p === "string" && (p.startsWith("admin.") || p.includes("manage")));
+    permissions.some((p) => typeof p === "string" && p.startsWith("admin."));
 
   return hasAdminRole || hasAdminPermission;
 }

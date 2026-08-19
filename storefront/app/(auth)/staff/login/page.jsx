@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Briefcase, Phone, KeyRound, Mail, Lock, ArrowLeft, Copy, Check } from "lucide-react";
@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
 import { getAdminUrl, isAdminUser } from "@/lib/utils";
 
-export default function StaffLoginPage() {
+function StaffLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -326,5 +326,13 @@ export default function StaffLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function StaffLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <StaffLoginForm />
+    </Suspense>
   );
 }

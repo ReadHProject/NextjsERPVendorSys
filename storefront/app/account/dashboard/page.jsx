@@ -7,33 +7,59 @@ import { api } from "@/lib/api";
 import { getAdminUrl } from "@/lib/utils";
 
 function getRoleMeta(roles = []) {
-  const upperRoles = roles.map((r) => r.toUpperCase());
-  if (upperRoles.some((r) => ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SALESMAN", "SUPPLIER", "VENDOR"].includes(r))) {
-    const isSupplier = upperRoles.includes("SUPPLIER") || upperRoles.includes("VENDOR");
+  const upperRoles = roles.map((r) => r?.toUpperCase());
+  if (upperRoles.some((r) => ["SUPER_ADMIN", "SUPERADMIN", "ADMIN", "SUB_ADMIN"].includes(r))) {
     return {
-      label: isSupplier ? "Supplier Partner" : "Administrator",
+      label: "Administrator",
       discount: "System Access",
       credit: "Full Management",
       badgeBg: "bg-purple-100 text-purple-700",
       isAdmin: true,
     };
   }
-  if (roles.includes("DISTRIBUTOR")) {
-    return { label: "Distributor", discount: "35-45% OFF", credit: "45 Days", badgeBg: "bg-indigo-100 text-indigo-700" };
+  if (upperRoles.includes("SALESMAN")) {
+    return {
+      label: "Sales Executive",
+      discount: "Staff Perks",
+      credit: "Standard",
+      badgeBg: "bg-blue-100 text-blue-700",
+      isAdmin: false,
+    };
   }
-  if (roles.includes("WHOLESALER")) {
-    return { label: "Wholesaler", discount: "30-40% OFF", credit: "30 Days", badgeBg: "bg-violet-100 text-violet-700" };
+  if (upperRoles.includes("WAREHOUSE_MANAGER") || upperRoles.includes("STAFF")) {
+    return {
+      label: "Staff Member",
+      discount: "Staff Perks",
+      credit: "Standard",
+      badgeBg: "bg-slate-100 text-slate-700",
+      isAdmin: false,
+    };
   }
-  if (roles.includes("DEALER")) {
-    return { label: "Dealer", discount: "20-30% OFF", credit: "15 Days", badgeBg: "bg-blue-100 text-blue-700" };
+  if (upperRoles.includes("SUPPLIER") || upperRoles.includes("VENDOR")) {
+    return {
+      label: "Supplier Partner",
+      discount: "Vendor Terms",
+      credit: "Standard",
+      badgeBg: "bg-amber-100 text-amber-700",
+      isAdmin: false,
+    };
   }
-  if (roles.includes("RETAILER")) {
-    return { label: "Retailer", discount: "10-20% OFF", credit: "7 Days", badgeBg: "bg-emerald-100 text-emerald-700" };
+  if (upperRoles.includes("DISTRIBUTOR")) {
+    return { label: "Distributor", discount: "35-45% OFF", credit: "45 Days", badgeBg: "bg-indigo-100 text-indigo-700", isAdmin: false };
   }
-  if (roles.includes("PARLOUR")) {
-    return { label: "Beauty Parlour", discount: "15-25% OFF", credit: "15 Days", badgeBg: "bg-pink-100 text-pink-700" };
+  if (upperRoles.includes("WHOLESALER")) {
+    return { label: "Wholesaler", discount: "30-40% OFF", credit: "30 Days", badgeBg: "bg-violet-100 text-violet-700", isAdmin: false };
   }
-  return { label: "Customer", discount: "Standard Member", credit: "Prepaid / COD", badgeBg: "bg-gray-100 text-gray-700" };
+  if (upperRoles.includes("DEALER")) {
+    return { label: "Dealer", discount: "20-30% OFF", credit: "15 Days", badgeBg: "bg-blue-100 text-blue-700", isAdmin: false };
+  }
+  if (upperRoles.includes("RETAILER")) {
+    return { label: "Retailer", discount: "10-20% OFF", credit: "7 Days", badgeBg: "bg-emerald-100 text-emerald-700", isAdmin: false };
+  }
+  if (upperRoles.includes("PARLOUR")) {
+    return { label: "Beauty Parlour", discount: "15-25% OFF", credit: "15 Days", badgeBg: "bg-pink-100 text-pink-700", isAdmin: false };
+  }
+  return { label: "Customer", discount: "Standard Member", credit: "Prepaid / COD", badgeBg: "bg-gray-100 text-gray-700", isAdmin: false };
 }
 
 export default function DashboardPage() {

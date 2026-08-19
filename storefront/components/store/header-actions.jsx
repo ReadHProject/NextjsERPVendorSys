@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -10,6 +10,7 @@ import { getAdminUrl, isAdminUser, getDashboardUrl } from "@/lib/utils";
 
 export function HeaderActions() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,26 +45,29 @@ export function HeaderActions() {
   }
 
   const isAdmin = isAdminUser(user);
+  const isAccountPage = pathname?.startsWith("/account");
 
   return (
     <div className="flex items-center gap-1">
       <ThemeToggle />
       {!loading && user ? (
         <div className="flex items-center gap-2">
-          <a
-            href={getDashboardUrl(user)}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium text-sm"
-          >
-            <Icon name="layout-dashboard" size={16} />
-            {isAdmin ? "Admin Dashboard" : "Dashboard"}
-          </a>
+          {isAdmin && !isAccountPage && (
+            <a
+              href={getAdminUrl("/admin")}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium text-sm"
+            >
+              <Icon name="layout-dashboard" size={16} />
+              Admin Dashboard
+            </a>
+          )}
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
             >
               <span className="material-symbols-outlined text-xl">account_circle</span>
-              <span className="text-sm font-medium hidden sm:inline">{user.name?.split(' ')[0]}</span>
+              <span className="text-sm font-medium hidden sm:inline">{user.name?.split(' ')[0] || user.email?.split('@')[0] || "Account"}</span>
             </button>
             {menuOpen && (
               <>
