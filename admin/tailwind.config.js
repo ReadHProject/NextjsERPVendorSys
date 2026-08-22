@@ -5,18 +5,21 @@ const baseDir = __dirname.replace(/\\/g, "/");
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-  content: [
-    `${baseDir}/app/**/*.{js,jsx,ts,tsx}`,
-    `${baseDir}/components/**/*.{js,jsx,ts,tsx}`,
-    `${baseDir}/lib/**/*.{js,jsx,ts,tsx}`,
-    "./app/**/*.{js,jsx,ts,tsx}",
-    "./components/**/*.{js,jsx,ts,tsx}",
-    "./lib/**/*.{js,jsx,ts,tsx}",
-    "./admin/app/**/*.{js,jsx,ts,tsx}",
-    "./admin/components/**/*.{js,jsx,ts,tsx}",
-    "../admin/app/**/*.{js,jsx,ts,tsx}",
-    "../admin/components/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: {
+    relative: true,
+    files: [
+      "./app/**/*.{js,jsx,ts,tsx}",
+      "./components/**/*.{js,jsx,ts,tsx}",
+      "./lib/**/*.{js,jsx,ts,tsx}",
+      `${baseDir}/app/**/*.{js,jsx,ts,tsx}`,
+      `${baseDir}/components/**/*.{js,jsx,ts,tsx}`,
+      `${baseDir}/lib/**/*.{js,jsx,ts,tsx}`,
+      "./admin/app/**/*.{js,jsx,ts,tsx}",
+      "./admin/components/**/*.{js,jsx,ts,tsx}",
+      "../admin/app/**/*.{js,jsx,ts,tsx}",
+      "../admin/components/**/*.{js,jsx,ts,tsx}",
+    ],
+  },
   theme: {
     extend: {
       colors: {
