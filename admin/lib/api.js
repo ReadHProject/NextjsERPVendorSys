@@ -6,9 +6,15 @@ function getApiBase() {
   if (typeof window !== "undefined") {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
-    return `${protocol}//${hostname}:5000/api/v1`;
+    const port = window.location.port;
+    if (port === "3000" || port === "3001") {
+      return `${protocol}//${hostname}:5000/api/v1`;
+    }
+    const portSuffix = port ? `:${port}` : "";
+    return `${protocol}//${hostname}${portSuffix}/api/v1`;
   }
-  return "http://localhost:5000/api/v1";
+  const serverPort = process.env.PORT || 5000;
+  return `http://127.0.0.1:${serverPort}/api/v1`;
 }
 
 async function request(path, options = {}) {

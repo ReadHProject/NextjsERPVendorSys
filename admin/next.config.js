@@ -1,4 +1,5 @@
 const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const rawApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 const API_BASE = (rawApi.includes("onrender.com") ? "http://localhost:5000/api/v1" : rawApi).replace(/\/api\/v1\/?$/, "");
 

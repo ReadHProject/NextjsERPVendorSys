@@ -29,7 +29,7 @@ ensureDir("nodejs");
 ensureDir(".next/nodejs");
 
 // 2. Copy entry point files across root, nodejs, and .next build target directories
-const filesToCopy = ["server.js", "index.js", "app.js", "package.json"];
+const filesToCopy = [".env", "server.js", "index.js", "app.js", "package.json"];
 filesToCopy.forEach((file) => {
   if (fs.existsSync(file)) {
     fs.copyFileSync(file, path.join("nodejs", file));

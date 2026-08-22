@@ -1,8 +1,8 @@
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 require("dotenv").config({ path: path.join(__dirname, "backend/.env") });
-require("dotenv").config({ path: path.join(__dirname, "../backend/.env") });
 const express = require("express");
 const next = require("next");
 

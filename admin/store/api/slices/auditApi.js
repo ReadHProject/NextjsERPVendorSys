@@ -1,7 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL;
-const API_URL = (rawApiUrl && !rawApiUrl.includes("onrender.com")) ? rawApiUrl : "http://localhost:5000/api/v1";
+const API_URL = (rawApiUrl && !rawApiUrl.includes("onrender.com"))
+  ? rawApiUrl
+  : (typeof window !== "undefined" && (window.location.port === "3000" || window.location.port === "3001"))
+    ? "http://localhost:5000/api/v1"
+    : "/api/v1";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
