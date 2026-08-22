@@ -54,7 +54,7 @@ async function request(path, options = {}) {
   try {
     res = await fetch(url, config);
   } catch (netErr) {
-    console.error("[API Network Error]", url, netErr);
+    console.warn(`[API Network Warning] Unable to reach ${url}: ${netErr.message || netErr}`);
     const err = new Error("Unable to connect to server. Please check if the backend is running.");
     err.status = 503;
     throw err;
