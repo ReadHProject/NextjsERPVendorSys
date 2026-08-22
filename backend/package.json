@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node --watch src/server.js",
+    "dev": "node --watch --watch-path=src src/server.js",
     "start": "node src/server.js",
     "postinstall": "npx prisma generate",
     "prestart": "npx prisma db push --accept-data-loss --skip-generate",
