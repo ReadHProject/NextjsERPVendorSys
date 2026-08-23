@@ -86,6 +86,7 @@ router.post("/", authenticate, validate(orderCreateSchema), async (req, res, nex
         productId: product.id, variantId: variant.id, sku: variant.sku,
         name: `${product.name}${variant.name !== product.name ? ` - ${variant.name}` : ""}`.trim(),
         quantity: it.quantity, unitPrice, taxRate: Number(product.gstRate),
+        lineTotal: line,
       });
     }
 

@@ -54,19 +54,23 @@ export default function CheckoutPage() {
     }
     setSubmitting(true);
     try {
-      const order = await api.post("/store/orders", {
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+      const order = await api.post("/orders", {
+        items: items.map((i) => ({
+          productId: i.productId || i.id,
+          variantId: i.variantId || (i.variants?.[0]?.id),
+          quantity: i.quantity,
+        })),
         shippingAddress: {
-          fullName: form.fullName,
+          name: form.fullName,
           phone: form.phone,
-          email: form.email,
           line1: form.addressLine1,
-          line2: form.addressLine2,
+          line2: form.addressLine2 || "",
           city: form.city,
           state: form.state,
           pincode: form.pincode,
+          country: "India",
         },
-        paymentMethod: form.paymentMethod,
+        paymentMethod: (form.paymentMethod || "COD").toUpperCase() === "ONLINE" ? "RAZORPAY" : (form.paymentMethod || "COD").toUpperCase(),
       });
       localStorage.removeItem("cart");
       toast.success("Order placed successfully!");

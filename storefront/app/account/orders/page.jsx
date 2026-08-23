@@ -26,7 +26,7 @@ export default function OrdersPage() {
       router.push("/login");
       return;
     }
-    api.get("/store/orders")
+    api.get("/orders")
       .then((data) => setOrders(Array.isArray(data) ? data : data?.items || []))
       .catch(() => {})
       .finally(() => setLoading(false));
