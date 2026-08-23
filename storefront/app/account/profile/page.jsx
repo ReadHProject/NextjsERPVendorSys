@@ -28,8 +28,9 @@ export default function ProfilePage() {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
-      window.location.href = "/login";
     }
     checkAuth();
   }, [router]);

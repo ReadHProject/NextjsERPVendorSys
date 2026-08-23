@@ -13,13 +13,13 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("erp_access_token");
     if (!token) {
       router.push("/login");
       return;
     }
     api.get("/store/wishlist")
-      .then((data) => setItems(data))
+      .then((data) => setItems(Array.isArray(data) ? data : data?.items || []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [router]);

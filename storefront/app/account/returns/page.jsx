@@ -23,13 +23,13 @@ export default function ReturnsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("erp_access_token");
     if (!token) {
       router.push("/login");
       return;
     }
     api.get("/store/returns")
-      .then((data) => setReturns(data))
+      .then((data) => setReturns(Array.isArray(data) ? data : data?.items || []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [router]);
