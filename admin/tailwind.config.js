@@ -1,7 +1,3 @@
-const path = require("path");
-
-const baseDir = __dirname.replace(/\\/g, "/");
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
@@ -11,13 +7,6 @@ module.exports = {
       "./app/**/*.{js,jsx,ts,tsx}",
       "./components/**/*.{js,jsx,ts,tsx}",
       "./lib/**/*.{js,jsx,ts,tsx}",
-      `${baseDir}/app/**/*.{js,jsx,ts,tsx}`,
-      `${baseDir}/components/**/*.{js,jsx,ts,tsx}`,
-      `${baseDir}/lib/**/*.{js,jsx,ts,tsx}`,
-      "./admin/app/**/*.{js,jsx,ts,tsx}",
-      "./admin/components/**/*.{js,jsx,ts,tsx}",
-      "../admin/app/**/*.{js,jsx,ts,tsx}",
-      "../admin/components/**/*.{js,jsx,ts,tsx}",
     ],
   },
   theme: {

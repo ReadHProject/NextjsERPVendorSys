@@ -14,7 +14,7 @@ const rootDir = fs.existsSync(path.join(__dirname, "backend"))
   : __dirname;
 
 const PORT = process.env.PORT || 3000;
-const dev = process.env.NODE_ENV === "development";
+const dev = process.argv.includes("--dev") || (process.env.NODE_ENV === "development" && !fs.existsSync(path.join(rootDir, "storefront/.next")));
 
 async function main() {
   if (dev) {
