@@ -104,28 +104,42 @@ export default function ProductFormModal({ open, onOpenChange, onCreated, editPr
     .find((pt) => pt.id === form.productTypeId)?.name?.toLowerCase();
 
   const isJewelry = selectedProductTypeName === "jewelry" || selectedProductTypeName === "jewellery";
-  const isStandard = selectedProductTypeName === "cosmetics" || selectedProductTypeName === "cutlery";
+  const isStandard = selectedProductTypeName === "cosmetics" || selectedProductTypeName === "cosmetic" || selectedProductTypeName === "cutlery";
 
-  function flattenTree(nodes, depth = 0) {
-    if (!Array.isArray(nodes)) return [];
-    return nodes.reduce((acc, node) => {
-      acc.push({ id: node.id, name: `${"  ".repeat(depth)}${node.name}` });
+  function findCategoryInTree(nodes, id) {
+    if (!Array.isArray(nodes) || !id) return null;
+    for (const node of nodes) {
+      if (node.id === id) return node;
       if (node.children) {
-        acc.push(...flattenTree(node.children, depth + 1));
+        const found = findCategoryInTree(node.children, id);
+        if (found) return found;
       }
-      return acc;
-    }, []);
+    }
+    return null;
   }
 
-  const rootCategories = categories.map((c) => ({ id: c.id, name: c.name }));
-
-  const selectedCategory = categories.find((c) => c.id === form.categoryId);
-  const subCategories = selectedCategory
-    ? (selectedCategory.children || []).map((child) => ({
-      id: child.id,
-      name: child.name,
-    }))
+  const flatCategoriesList = Array.isArray(categories)
+    ? categories.reduce((acc, cat) => {
+        acc.push({ id: cat.id, name: cat.name });
+        if (cat.children) {
+          cat.children.forEach((child) =>
+            acc.push({ id: child.id, name: child.name })
+          );
+        }
+        return acc;
+      }, [])
     : [];
+
+  const rootCategories = flatCategoriesList.length > 0
+    ? flatCategoriesList
+    : categories.map((c) => ({ id: c.id, name: c.name }));
+
+  const selectedCategory = findCategoryInTree(categories, form.categoryId);
+  const subCategories = selectedCategory && selectedCategory.children?.length > 0
+    ? selectedCategory.children.map((child) => ({ id: child.id, name: child.name }))
+    : Array.isArray(categories)
+      ? categories.filter((c) => c.parentId === form.categoryId).map((c) => ({ id: c.id, name: c.name }))
+      : [];
 
   useEffect(() => {
     if (open) {

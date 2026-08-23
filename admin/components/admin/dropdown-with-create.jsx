@@ -74,16 +74,20 @@ export function DropdownWithCreate({
       </Label>
       <div className="flex gap-2 mt-1 items-center">
         <div className="flex-1">
-          <Select value={value} onValueChange={onChange} disabled={disabled}>
+          <Select value={value || ""} onValueChange={onChange} disabled={disabled}>
             <SelectTrigger>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
-              {options.map((opt) => (
-                <SelectItem key={opt.id} value={opt.id} label={opt.name || opt.label}>
-                  {opt.name || opt.label}
-                </SelectItem>
-              ))}
+              {(options || []).map((opt, idx) => {
+                const val = opt.id !== undefined && opt.id !== null ? String(opt.id) : (opt.value !== undefined && opt.value !== null ? String(opt.value) : "");
+                const labelText = opt.name || opt.label || val;
+                return (
+                  <SelectItem key={opt.id || opt.value || idx} value={val} label={labelText}>
+                    {labelText}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

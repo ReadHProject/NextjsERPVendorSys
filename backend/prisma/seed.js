@@ -305,8 +305,11 @@ async function main() {
 
   // Product Types
   const ptData = [
-    { name: "Simple Product", slug: "simple", description: "Standard single-variant product", sortOrder: 0 },
-    { name: "Variable Product", slug: "variable", description: "Product with multiple variants", sortOrder: 1 },
+    { name: "Cosmetics", slug: "cosmetics", description: "Cosmetics product type", sortOrder: 0 },
+    { name: "Jewellery", slug: "jewellery", description: "Jewellery product type", sortOrder: 1 },
+    { name: "Cutlery", slug: "cutlery", description: "Cutlery product type", sortOrder: 2 },
+    { name: "Simple Product", slug: "simple", description: "Standard single-variant product", sortOrder: 3 },
+    { name: "Variable Product", slug: "variable", description: "Product with multiple variants", sortOrder: 4 },
   ];
   await prisma.productType.createMany({ data: ptData, skipDuplicates: true });
   console.log("  Created product types");

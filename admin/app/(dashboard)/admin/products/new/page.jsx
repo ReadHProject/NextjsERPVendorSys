@@ -115,18 +115,31 @@ export default function ProductNewPage() {
       }, [])
     : [];
 
+  function findCategoryInTree(nodes, id) {
+    if (!Array.isArray(nodes) || !id) return null;
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      if (node.children) {
+        const found = findCategoryInTree(node.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
   // Get subcategories based on selected parent category
-  const subCategories = Array.isArray(categories)
-    ? categories
-        .filter((c) => c.parentId === form.categoryId)
-        .map((c) => ({ id: c.id, name: c.name }))
-    : [];
+  const selectedCategory = findCategoryInTree(categories, form.categoryId);
+  const subCategories = selectedCategory && selectedCategory.children?.length > 0
+    ? selectedCategory.children.map((child) => ({ id: child.id, name: child.name }))
+    : Array.isArray(categories)
+      ? categories.filter((c) => c.parentId === form.categoryId).map((c) => ({ id: c.id, name: c.name }))
+      : [];
 
   const selectedProductTypeName = (productTypesData?.data || productTypesData || [])
     .find((pt) => pt.id === form.productTypeId)?.name?.toLowerCase();
     
   const isJewelry = selectedProductTypeName === "jewelry" || selectedProductTypeName === "jewellery";
-  const isStandard = selectedProductTypeName === "cosmetics" || selectedProductTypeName === "cutlery";
+  const isStandard = selectedProductTypeName === "cosmetics" || selectedProductTypeName === "cosmetic" || selectedProductTypeName === "cutlery";
 
   function updateField(field, value) {
     setForm((prev) => {
@@ -279,7 +292,9 @@ export default function ProductNewPage() {
                 label="Product Type"
                 value={form.productTypeId}
                 onChange={(val) => updateField("productTypeId", val)}
-                options={(productTypesData?.data || productTypesData || []).map((pt) => ({ id: pt.id, name: pt.name }))}
+                options={(productTypesData?.data || productTypesData || [])
+                  .filter(pt => ["cosmetic", "cosmetics", "cutlery", "jewellery", "jewelry"].includes(pt.name?.toLowerCase()))
+                  .map((pt) => ({ id: pt.id, name: pt.name }))}
                 placeholder="Select Type..."
                 createMutation={createProductType}
                 createLabel="Name"
@@ -839,7 +854,9 @@ export default function ProductNewPage() {
             label="Product Type *"
             value={form.productTypeId}
             onChange={(val) => updateField("productTypeId", val)}
-            options={(productTypesData?.data || productTypesData || []).map((pt) => ({ id: pt.id, name: pt.name }))}
+            options={(productTypesData?.data || productTypesData || [])
+              .filter(pt => ["cosmetic", "cosmetics", "cutlery", "jewellery", "jewelry"].includes(pt.name?.toLowerCase()))
+              .map((pt) => ({ id: pt.id, name: pt.name }))}
             placeholder="Select Type..."
             createMutation={createProductType}
             createLabel="Name"
