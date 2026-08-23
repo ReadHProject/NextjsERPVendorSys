@@ -21,15 +21,23 @@ export function slugify(s) {
 }
 
 export function getStorefrontUrl(path = "") {
-  if (typeof window === "undefined") {
-    return (process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000") + path;
+  let cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (origin.includes(":3001")) {
+      return `${origin.replace(":3001", ":3000")}${cleanPath}`;
+    }
+    const storeUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL;
+    if (storeUrl && !storeUrl.includes("localhost") && !storeUrl.includes("127.0.0.1")) {
+      return `${storeUrl.replace(/\/$/, "")}${cleanPath}`;
+    }
+    return `${origin}${cleanPath}`;
   }
-  if (process.env.NEXT_PUBLIC_STOREFRONT_URL) {
-    return `${process.env.NEXT_PUBLIC_STOREFRONT_URL}${path}`;
+
+  const storeUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL;
+  if (storeUrl && !storeUrl.includes("localhost") && !storeUrl.includes("127.0.0.1")) {
+    return `${storeUrl.replace(/\/$/, "")}${cleanPath}`;
   }
-  const origin = window.location.origin;
-  if (origin.includes(":3001")) {
-    return `${origin.replace(":3001", ":3000")}${path}`;
-  }
-  return `${origin}${path}`;
+  return cleanPath;
 }

@@ -1,8 +1,9 @@
 function getApiBase() {
-  let url = process.env.NEXT_PUBLIC_API_URL;
-  if (url && !url.includes("onrender.com")) {
-    return url;
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1") && !envUrl.includes("onrender.com")) {
+    return envUrl;
   }
+
   if (typeof window !== "undefined") {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
@@ -13,6 +14,7 @@ function getApiBase() {
     const portSuffix = port ? `:${port}` : "";
     return `${protocol}//${hostname}${portSuffix}/api/v1`;
   }
+
   const serverPort = process.env.PORT || 5000;
   return `http://127.0.0.1:${serverPort}/api/v1`;
 }

@@ -21,17 +21,28 @@ export function slugify(s) {
 }
 
 export function getAdminUrl(path = "") {
-  if (typeof window === "undefined") {
-    return (process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001") + path;
+  let cleanPath = path.startsWith("/") ? path : `/${path}`;
+  if (!cleanPath.startsWith("/admin") && !cleanPath.startsWith("http")) {
+    cleanPath = `/admin${cleanPath}`;
   }
-  if (process.env.NEXT_PUBLIC_ADMIN_URL) {
-    return `${process.env.NEXT_PUBLIC_ADMIN_URL}${path}`;
+
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (origin.includes(":3000")) {
+      return `${origin.replace(":3000", ":3001")}${cleanPath}`;
+    }
+    const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+    if (adminUrl && !adminUrl.includes("localhost") && !adminUrl.includes("127.0.0.1")) {
+      return `${adminUrl.replace(/\/$/, "")}${cleanPath.replace(/^\/admin/, "")}`;
+    }
+    return `${origin}${cleanPath}`;
   }
-  const origin = window.location.origin;
-  if (origin.includes(":3000")) {
-    return `${origin.replace(":3000", ":3001")}${path}`;
+
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+  if (adminUrl && !adminUrl.includes("localhost") && !adminUrl.includes("127.0.0.1")) {
+    return `${adminUrl.replace(/\/$/, "")}${cleanPath.replace(/^\/admin/, "")}`;
   }
-  return `${origin}/admin${path}`;
+  return cleanPath;
 }
 
 export function isAdminUser(user) {
