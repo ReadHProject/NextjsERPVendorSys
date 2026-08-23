@@ -6,7 +6,6 @@ process.env.NODE_ENV = isBuild ? "production" : (currentEnv || process.env.NODE_
 const rawApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 const API_BASE = (rawApi.includes("onrender.com") ? "http://localhost:5000/api/v1" : rawApi).replace(/\/api\/v1\/?$/, "");
 const nextConfig = {
-  output: "standalone",
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(__dirname, ".."),

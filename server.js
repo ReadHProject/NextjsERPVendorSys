@@ -51,7 +51,12 @@ async function main() {
   });
 
   // 3) Admin Pages (/admin, /admin/*)
-  server.use("/admin", (req, res) => handleAdmin(req, res));
+  server.use((req, res, next) => {
+    if (req.path === "/admin" || req.path.startsWith("/admin/")) {
+      return handleAdmin(req, res);
+    }
+    next();
+  });
 
   // 4) Storefront Catch-All (/, /store/*, /account/*, /login, /_next/*)
   server.use((req, res) => handleStore(req, res));

@@ -8,7 +8,6 @@ const API_BASE = (rawApi.includes("onrender.com") ? "http://localhost:5000/api/v
 
 const nextConfig = {
   assetPrefix: process.env.NODE_ENV === "production" ? "/admin-assets" : "",
-  output: "standalone",
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(__dirname, ".."),
