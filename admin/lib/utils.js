@@ -22,6 +22,7 @@ export function slugify(s) {
 
 export function getStorefrontUrl(path = "") {
   let cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const defaultUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000";
 
   if (typeof window !== "undefined") {
     const origin = window.location.origin;
@@ -32,12 +33,12 @@ export function getStorefrontUrl(path = "") {
     if (storeUrl && !storeUrl.includes("localhost") && !storeUrl.includes("127.0.0.1")) {
       return `${storeUrl.replace(/\/$/, "")}${cleanPath}`;
     }
-    return `${origin}${cleanPath}`;
+    return `${origin.replace(/\/$/, "")}${cleanPath}`;
   }
 
   const storeUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL;
   if (storeUrl && !storeUrl.includes("localhost") && !storeUrl.includes("127.0.0.1")) {
     return `${storeUrl.replace(/\/$/, "")}${cleanPath}`;
   }
-  return cleanPath;
+  return `${defaultUrl.replace(/\/$/, "")}${cleanPath}`;
 }

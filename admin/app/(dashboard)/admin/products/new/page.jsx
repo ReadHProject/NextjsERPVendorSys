@@ -94,13 +94,12 @@ export default function ProductNewPage() {
   const customerTypes = customerTypesData?.data || customerTypesData || [];
   const categories = categoriesData?.data || categoriesData || [];
   const brands = brandsData?.data || brandsData || [];
-  const roles = [
-    "Dealer",
-    "Wholesaler",
-    "Parlour",
-    "Retailer",
-    "General",
-  ];
+  const dbRoles = Array.isArray(rolesData?.data || rolesData)
+    ? (rolesData?.data || rolesData)
+        .filter((r) => !["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "STAFF", "WAREHOUSE_MANAGER", "SUPPLIER", "VENDOR"].includes(r.name?.toUpperCase()))
+        .map((r) => r.name)
+    : [];
+  const roles = dbRoles.length > 0 ? dbRoles : ["Dealer", "Wholesaler", "Parlour", "Retailer", "General"];
 
   // Get flat categories for dropdown
   const flatCategories = Array.isArray(categories)

@@ -93,15 +93,19 @@ function CustomerLoginForm() {
   };
 
   const handleRedirect = (data) => {
+    const token = data?.accessToken || (typeof window !== "undefined" ? localStorage.getItem("erp_access_token") : null);
     const from = searchParams.get("from");
     if (from) {
       if (from.startsWith("http")) {
-        window.location.href = from;
+        const url = new URL(from);
+        if (token) url.searchParams.set("token", token);
+        window.location.href = url.toString();
       } else {
         router.push(from);
       }
     } else if (isAdminUser(data.user)) {
-      window.location.href = getAdminUrl(`/admin?token=${data.accessToken}`);
+      const targetPath = token ? `/admin?token=${encodeURIComponent(token)}` : "/admin";
+      window.location.href = getAdminUrl(targetPath);
     } else {
       router.push("/account/dashboard");
     }

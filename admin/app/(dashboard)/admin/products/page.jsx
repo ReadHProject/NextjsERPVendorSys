@@ -71,7 +71,6 @@ export default function ProductsPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ page: String(page) });
-      params.set("status", "ACTIVE");
       if (q) params.set("q", q);
       const res = await api.get(`/products?${params.toString()}`);
       setData(res);
