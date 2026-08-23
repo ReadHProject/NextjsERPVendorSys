@@ -15,7 +15,13 @@ function copyRecursiveSync(src, dest) {
   if (isDirectory) {
     ensureDir(dest);
     fs.readdirSync(src).forEach((childItemName) => {
-      if (childItemName === ".next" || childItemName === "cache" || childItemName === ".git" || childItemName === "nodejs") return;
+      if (
+        childItemName === "node_modules" ||
+        childItemName === "cache" ||
+        childItemName === ".git" ||
+        childItemName === "nodejs" ||
+        childItemName === ".DS_Store"
+      ) return;
       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
     });
   } else if (exists) {

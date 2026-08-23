@@ -11,6 +11,8 @@ dist
 **/dist
 build
 **/build
+nodejs
+**/nodejs
 
 # Environment files
 .env
