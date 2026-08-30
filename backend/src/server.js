@@ -1,12 +1,11 @@
 const app = require("./app");
 const config = require("./config");
+const { prisma } = require("./config/database");
 
 const PORT = config.port;
 
 async function start() {
   try {
-    const { PrismaClient } = require("@prisma/client");
-    const prisma = new PrismaClient();
     await prisma.$connect();
     console.log("Database connected");
 
