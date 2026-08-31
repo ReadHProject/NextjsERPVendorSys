@@ -30,6 +30,11 @@ export default function AccountLayout({ children }) {
     }
 
     async function checkAuth() {
+      // Early exit if no token in localStorage
+      if (typeof window !== "undefined" && !localStorage.getItem("erp_access_token")) {
+        window.location.href = "/login?from=" + encodeURIComponent(window.location.href);
+        return;
+      }
       try {
         const data = await api.get("/auth/me");
         if (data && data.id) {
@@ -40,6 +45,11 @@ export default function AccountLayout({ children }) {
       } catch (err) {
         console.error("Auth check failed in layout", err);
       }
+      // Clear stale localStorage on auth failure
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("erp_access_token");
+        localStorage.removeItem("user");
+      }
       window.location.href = "/login?from=" + encodeURIComponent(window.location.href);
     }
     checkAuth();
@@ -49,7 +59,10 @@ export default function AccountLayout({ children }) {
     try {
       await api.post("/auth/logout", {});
     } catch (e) {}
-    localStorage.removeItem("erp_access_token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("erp_access_token");
+      localStorage.removeItem("user");
+    }
     window.location.href = "/store";
   }
 

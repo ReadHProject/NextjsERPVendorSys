@@ -65,6 +65,13 @@ function setTokenCookies(res, accessToken, refreshToken) {
   });
 }
 
+function clearTokenCookies(res) {
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieOpts = { httpOnly: true, secure: isProd, sameSite: "lax", path: "/" };
+  res.clearCookie(ACCESS_COOKIE, cookieOpts);
+  res.clearCookie(REFRESH_COOKIE, cookieOpts);
+}
+
 router.post("/send-otp", otpLimiter, validate(sendOtpSchema), async (req, res, next) => {
   try {
     const { mobile, role } = req.body;
@@ -330,8 +337,7 @@ router.post("/refresh", async (req, res, next) => {
 });
 
 router.post("/logout", async (req, res) => {
-  res.clearCookie(ACCESS_COOKIE);
-  res.clearCookie(REFRESH_COOKIE);
+  clearTokenCookies(res);
   res.json({ success: true, data: { message: "Logged out" } });
 });
 

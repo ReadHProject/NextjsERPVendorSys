@@ -37,11 +37,12 @@ export function HeaderActions() {
     try {
       await api.post("/auth/logout", {});
     } catch (e) {}
-    localStorage.removeItem("erp_access_token");
-    setUser(null);
-    setMenuOpen(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("erp_access_token");
+      localStorage.removeItem("user");
+    }
     toast.success("Logged out successfully");
-    router.push("/store");
+    window.location.href = "/store";
   }
 
   const isAdmin = isAdminUser(user);
